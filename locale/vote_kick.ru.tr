@@ -1,0 +1,13 @@
+# textdomain: vote_kick
+`@1` started a vote to kick `@2` from the server.= `@1` начал голосование за кик `@2` с сервера.
+Do you accept?= Вы согласны?
+Yes=Да
+No=Нет
+The vote to kick you passed.= Голосование за ваш кик прошло.
+Not enough votes collected. @1 remains in the game= Собрано недостаточно голосов. @1 остается в игре
+Voting passed @1 will be kicked out. YES[@2] NO[@3]= Голосование прошло успешно @1 будет выгнан. ЗА[@2] ПРОТИВ[@3]
+Voting failed @1 remains ingame. YES[@2] NO[@3]= Голосование провалилось @1 осталось в игре. ЗА[@2] ПРОТИВ[@3]
+There is no player called @1= Нет игрока с именем @1
+You cannot start a vote to kick yourself!= Вы не можете начать голосование, чтобы выгнать себя!
+Usage: /vote_kick <player_name>= Использование: /vote_kick <имя_игрока>
+You must wait before starting another vote.= Вам необходимо подождать, прежде чем начать новое голосование.
