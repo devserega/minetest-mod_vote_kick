@@ -17,10 +17,6 @@ vote={
 	user={},
 }
 
-vote.percent = function(votes_yes, total_players)
-	return math.floor(100*votes_yes/total_players)
-end
-
 vote.receive=function(pos, player)
 	local pressed={}
 	vote.user[player:get_player_name()]=pos
@@ -30,25 +26,25 @@ end
 
 -- Получаем выбор игрока и закрываем форму после выбора
 vote.receive_fields=function(player, fields)
-    -- Если игрок проголосовал, фиксируем его голос
-    local pos = vote.user[player:get_player_name()]
-    if not pos then return end
-    local meta = minetest.get_meta(pos)
+	-- Если игрок проголосовал, фиксируем его голос
+	local pos = vote.user[player:get_player_name()]
+	if not pos then return end
+	local meta = minetest.get_meta(pos)
 
-    -- Проверяем, что был выбран вариант
-    if fields.vote_no then
-        meta:set_int("r2", meta:get_int("r2") + 1)  -- Увеличиваем количество голосов "No"
-        meta:set_string("log", meta:get_string("log") .. player:get_player_name() .. ", ")
-        minetest.close_formspec(player:get_player_name(), "vote.showform")  -- Закрываем форму
+	-- Проверяем, что был выбран вариант
+	if fields.vote_no then
+		meta:set_int("r2", meta:get_int("r2") + 1)  -- Увеличиваем количество голосов "No"
+		meta:set_string("log", meta:get_string("log") .. player:get_player_name() .. ", ")
+		minetest.close_formspec(player:get_player_name(), "vote.showform")  -- Закрываем форму
 
-        --minetest.log("NO counter=" .. meta:get_int("r2"))
-    elseif fields.vote_yes then
-        meta:set_int("r1", meta:get_int("r1") + 1)  -- Увеличиваем количество голосов "Yes"
-        meta:set_string("log", meta:get_string("log") .. player:get_player_name() .. ", ")
-        minetest.close_formspec(player:get_player_name(), "vote.showform")  -- Закрываем форму
+		--minetest.log("NO counter=" .. meta:get_int("r2"))
+	elseif fields.vote_yes then
+		meta:set_int("r1", meta:get_int("r1") + 1)  -- Увеличиваем количество голосов "Yes"
+		meta:set_string("log", meta:get_string("log") .. player:get_player_name() .. ", ")
+		minetest.close_formspec(player:get_player_name(), "vote.showform")  -- Закрываем форму
 
-        --minetest.log("YES counter=" .. meta:get_int("r1"))
-    end
+		--minetest.log("YES counter=" .. meta:get_int("r1"))
+	end
 end
 
 minetest.register_on_player_receive_fields(function(player, form, pressed)
@@ -96,6 +92,7 @@ minetest.register_chatcommand("vote_kick", {
 		end
 
 		-- Игрок не может голосовать за кик самого себя
+		--[[
 		if name == param then
 			minetest.chat_send_player(name, S("You cannot start a vote to kick yourself!"))
 			return
@@ -107,6 +104,7 @@ minetest.register_chatcommand("vote_kick", {
 			minetest.chat_send_player(name, msg)
 			return
 		end
+		]]
 
 		-- Убедимся, что last_vote_time[name] существует
 		if not last_vote_time[name] then
@@ -118,7 +116,7 @@ minetest.register_chatcommand("vote_kick", {
 		local time_passed_after_last_vote = current_time - last_vote_time[name]
 		if last_vote_time[name] and time_passed_after_last_vote < next_vote_wait_time then
 			local rest_wait_time = next_vote_wait_time - time_passed_after_last_vote
-			local msg = S("You must wait @1 before starting another vote.", rest_wait_time)
+			local msg = S("You must wait @1 seconds before starting another vote.", rest_wait_time)
 			minetest.chat_send_player(name, msg)
 			return
 		end
@@ -149,7 +147,8 @@ minetest.register_chatcommand("vote_kick", {
 		-- Проверка результатов через voting_timeout секунд
 		minetest.after(voting_timeout, function()
 			local players = minetest.get_connected_players()
-			local total_players = #players
+			local total_players_in_game = #players
+			local needed_votes = math.floor(0.66 * total_players_in_game) -- Нужно 2/3 голосов игроков на сервере
 
 			-- Время голосования закончилось закрываем формы для всех игроков, кто не успел проголосовать.
 			for _, player in pairs(players) do
@@ -158,21 +157,12 @@ minetest.register_chatcommand("vote_kick", {
 
 			local votes_yes = meta:get_int("r1")
 			local votes_no = meta:get_int("r2")
-
-			if total_votes == 0 then
-				local msg = S("Not enough votes collected. @1 remains in the game", param)
+			if votes_yes >= needed_votes then
+				local msg = S("Voting passed `@1` will be kicked out. Get votes @2 of @3 needed.", param, votes_yes, needed_votes)
 				minetest.chat_send_all(msg)
-				return
-			end
-
-			local percent_yes = vote.percent(votes_yes, total_players)
-			minetest.log(percent_yes)
-			if percent_yes >= 70 then
-				local msg = S("Voting passed @1 will be kicked out. YES[@2] NO[@3]", param, votes_yes, votes_no)
-				minetest.chat_send_all(msg)
-				minetest.kick_player(param, S("The vote to kick you passed."))
+				minetest.kick_player(param, S("Other 2/3 players vote to kick you from server."))
 			else
-				local msg = S("Voting failed @1 remains ingame. YES[@2] NO[@3]", param, votes_yes, votes_no)
+				local msg = S("Voting failed `@1` will stay in game. Get votes @2 of @3 needed.", param, votes_yes, needed_votes)
 				minetest.chat_send_all(msg)
 			end
 		end)
