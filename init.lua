@@ -83,11 +83,11 @@ end
 
 local last_vote_time = {}
 
-minetest.register_chatcommand("vote_kick", {
+minetest.register_chatcommand("votekick", {
 	privs = { interact = true },
 	func = function(name, param)
 		if not param or param == "" then
-			minetest.chat_send_player(name, S("Usage: /vote_kick <player_name>"))
+			minetest.chat_send_player(name, S("Usage: /votekick <player_name>"))
 			return
 		end
 
