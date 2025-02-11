@@ -9,8 +9,8 @@ local table = table
 local math = math
 local sf = string.format
 
-local voting_timeout=10 -- 60
-local next_vote_wait_time=300
+local voting_timeout=20 -- 60
+local next_vote_wait_time=60 -- 300
 
 -- Adds a voting machine
 vote={
