@@ -17,8 +17,8 @@ vote={
 	user={},
 }
 
-vote.percent = function(n, t)
-	return math.floor((((n/t)*100)*100)+0.5)/100
+vote.percent = function(votes_yes, total_players)
+	return math.floor(100*votes_yes/total_players)
 end
 
 vote.receive=function(pos, player)
@@ -110,8 +110,11 @@ minetest.register_chatcommand("vote_kick", {
 
 		-- Проверяем, запускалось ли голосование недавно
 		local current_time = minetest.get_gametime()
-		if last_vote_time[name] and current_time - last_vote_time[name] < next_vote_wait_time then
-			minetest.chat_send_player(name, S("You must wait before starting another vote."))
+		local time_passed_after_last_vote = current_time - last_vote_time[name]
+		if last_vote_time[name] and time_passed_after_last_vote < next_vote_wait_time then
+			local rest_wait_time = next_vote_wait_time - time_passed_after_last_vote
+			local msg = S("You must wait @1 before starting another vote.", rest_wait_time)
+			minetest.chat_send_player(name, msg)
 			return
 		end
 		last_vote_time[name] = current_time
@@ -140,14 +143,16 @@ minetest.register_chatcommand("vote_kick", {
 
 		-- Проверка результатов через voting_timeout секунд
 		minetest.after(voting_timeout, function()
+			local players = minetest.get_connected_players()
+			local total_players = #players
+
 			-- Время голосования закончилось закрываем формы для всех игроков, кто не успел проголосовать.
-			for _, player in pairs(minetest.get_connected_players()) do
+			for _, player in pairs(players) do
 				minetest.close_formspec(player:get_player_name(), "vote.showform")
 			end
 
 			local votes_yes = meta:get_int("r1")
 			local votes_no = meta:get_int("r2")
-			local total_votes = votes_yes + votes_no
 
 			if total_votes == 0 then
 				local msg = S("Not enough votes collected. @1 remains in the game", param)
@@ -155,9 +160,9 @@ minetest.register_chatcommand("vote_kick", {
 				return
 			end
 
-			local percent_yes = vote.percent(votes_yes, total_votes)
+			local percent_yes = vote.percent(votes_yes, total_players)
 			minetest.log(percent_yes)
-			if percent_yes >= 80 then
+			if percent_yes >= 70 then
 				local msg = S("Voting passed @1 will be kicked out. YES[@2] NO[@3]", param, votes_yes, votes_no)
 				minetest.chat_send_all(msg)
 				minetest.kick_player(param, S("The vote to kick you passed."))

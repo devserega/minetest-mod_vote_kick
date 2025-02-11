@@ -10,4 +10,4 @@ Voting failed @1 remains ingame. YES[@2] NO[@3]= Голосование пров
 There is no player called @1= Нет игрока с именем @1
 You cannot start a vote to kick yourself!= Вы не можете начать голосование, чтобы выгнать себя!
 Usage: /vote_kick <player_name>= Использование: /vote_kick <имя_игрока>
-You must wait before starting another vote.= Вам необходимо подождать, прежде чем начать новое голосование.
+You must wait @1 before starting another vote.= Вам необходимо подождать @1, прежде чем начать новое голосование.
