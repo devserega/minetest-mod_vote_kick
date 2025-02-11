@@ -146,7 +146,7 @@ minetest.register_chatcommand("vote_kick", {
 		minetest.after(voting_timeout, function()
 			local players = minetest.get_connected_players()
 			local total_players_in_game = #players
-			local needed_votes = math.floor(0.66 * total_players_in_game) -- Нужно 2/3 голосов игроков на сервере
+			local needed_votes = math.ceil(0.66 * total_players_in_game) -- Нужно 2/3 голосов игроков на сервере
 
 			-- Время голосования закончилось закрываем формы для всех игроков, кто не успел проголосовать.
 			for _, player in pairs(players) do
