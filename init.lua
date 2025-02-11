@@ -92,7 +92,6 @@ minetest.register_chatcommand("vote_kick", {
 		end
 
 		-- Игрок не может голосовать за кик самого себя
-		--[[
 		if name == param then
 			minetest.chat_send_player(name, S("You cannot start a vote to kick yourself!"))
 			return
@@ -104,7 +103,6 @@ minetest.register_chatcommand("vote_kick", {
 			minetest.chat_send_player(name, msg)
 			return
 		end
-		]]
 
 		-- Убедимся, что last_vote_time[name] существует
 		if not last_vote_time[name] then
