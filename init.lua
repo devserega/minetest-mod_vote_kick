@@ -108,6 +108,11 @@ minetest.register_chatcommand("vote_kick", {
 			return
 		end
 
+		-- Убедимся, что last_vote_time[name] существует
+		if not last_vote_time[name] then
+			last_vote_time[name] = 0  -- Устанавливаем начальное значение
+		end
+
 		-- Проверяем, запускалось ли голосование недавно
 		local current_time = minetest.get_gametime()
 		local time_passed_after_last_vote = current_time - last_vote_time[name]
